@@ -5,21 +5,18 @@ export default function CardsSection() {
   const [cards, setCards] = useState([]);
 
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE;
-
-const fetchCards = async () => {
-  try {
-    const res = await axios.get(`${API_BASE}/content/all`);
-    const data = res.data.find((item) => item.key === "cards");
-    if (data) {
-      const parsed = JSON.parse(data.value);
-      setCards(parsed);
-    }
-  } catch (err) {
-    console.error("Ошибка при загрузке карточек:", err);
-  }
-};
-
+    const fetchCards = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/content/all");
+        const data = res.data.find((item) => item.key === "cards");
+        if (data) {
+          const parsed = JSON.parse(data.value);
+          setCards(parsed);
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке карточек:", err);
+      }
+    };
 
     fetchCards();
   }, []);

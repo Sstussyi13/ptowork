@@ -1,13 +1,13 @@
 import express from 'express';
-import db from '../config/db.js'; // правильный путь к db (better-sqlite3)
+import dbPromise from '../db/database.js';
 
 const router = express.Router();
 
-// 🔹 Получение всего контента
-router.get('/all', (req, res) => {
+// Получение всего контента
+router.get('/all', async (req, res) => {
+  const db = await dbPromise;
   try {
-    const stmt = db.prepare('SELECT * FROM editable_content');
-    const rows = stmt.all();
+    const rows = await db.all('SELECT * FROM editable_content');
     res.json(rows);
   } catch (err) {
     console.error('Ошибка при получении контента:', err);
@@ -15,37 +15,37 @@ router.get('/all', (req, res) => {
   }
 });
 
-// 🔹 Получение контента по ключу
-router.get('/:key', (req, res) => {
+// Получение контента по ключу (например: cards, services)
+router.get('/:key', async (req, res) => {
+  const db = await dbPromise;
   const { key } = req.params;
 
   try {
-    const stmt = db.prepare('SELECT value FROM editable_content WHERE key = ?');
-    const row = stmt.get(key);
+    const row = await db.get('SELECT value FROM editable_content WHERE key = ?', [key]);
 
     if (!row) {
       return res.status(404).json({ message: 'Контент не найден' });
     }
 
-    res.json(row); // { value: '...' }
+    res.json(row); // вернёт { value: '[...]' }
   } catch (err) {
     console.error('Ошибка при получении контента по ключу:', err);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
-// 🔹 Обновление или вставка по ключу
-router.put('/:key', (req, res) => {
+// Обновление конкретного блока по ключу
+router.put('/:key', async (req, res) => {
+  const db = await dbPromise;
   const { key } = req.params;
   const { value } = req.body;
 
   try {
-    const stmt = db.prepare(`
+    await db.run(`
       INSERT INTO editable_content (key, value)
       VALUES (?, ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value
-    `);
-    stmt.run(key, value);
+    `, [key, value]);
 
     res.json({ message: 'Контент обновлён' });
   } catch (err) {

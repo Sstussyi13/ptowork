@@ -1,6 +1,7 @@
 import express from 'express';
-import db from '../config/db.js';
 import { submitRequest } from '../controllers/serviceRequestController.js';
+import dbPromise from '../db/database.js';
+import { requireAdmin } from '../middlewares/requireAdmin.js';
 
 const router = express.Router();
 
@@ -8,9 +9,10 @@ const router = express.Router();
 router.post('/requests', submitRequest);
 
 // 📥 Получение всех заявок
-router.get('/requests', (req, res) => {
+router.get('/requests', async (req, res) => {
   try {
-    const stmt = db.prepare(`
+    const db = await dbPromise;
+    const rows = await db.all(`
       SELECT 
         a.id,
         a.full_name,
@@ -22,7 +24,6 @@ router.get('/requests', (req, res) => {
       LEFT JOIN services s ON a.service_id = s.id
       ORDER BY a.created_at DESC
     `);
-    const rows = stmt.all();
     res.json(rows);
   } catch (err) {
     console.error('Ошибка при получении заявок:', err);
@@ -31,20 +32,21 @@ router.get('/requests', (req, res) => {
 });
 
 // ✏️ Обновление заявки
-router.put('/requests/:id', (req, res) => {
-  const { id } = req.params;
-  const { service_type, message } = req.body;
-
+router.put('/requests/:id', async (req, res) => {
   try {
-    const serviceStmt = db.prepare(`SELECT id FROM services WHERE name = ?`);
-    const service = serviceStmt.get(service_type);
+    const db = await dbPromise;
+    const { id } = req.params;
+    const { service_type, message } = req.body;
 
+    const service = await db.get(`SELECT id FROM services WHERE name = ?`, [service_type]);
     if (!service) {
       return res.status(400).json({ message: 'Такой услуги не существует' });
     }
 
-    const updateStmt = db.prepare(`UPDATE applications SET service_id = ?, message = ? WHERE id = ?`);
-    updateStmt.run(service.id, message, id);
+    await db.run(
+      `UPDATE applications SET service_id = ?, message = ? WHERE id = ?`,
+      [service.id, message, id]
+    );
 
     res.json({ message: 'Заявка обновлена' });
   } catch (err) {
@@ -54,12 +56,12 @@ router.put('/requests/:id', (req, res) => {
 });
 
 // ❌ Удаление заявки
-router.delete('/requests/:id', (req, res) => {
-  const { id } = req.params;
-
+router.delete('/requests/:id', async (req, res) => {
   try {
-    const deleteStmt = db.prepare(`DELETE FROM applications WHERE id = ?`);
-    deleteStmt.run(id);
+    const db = await dbPromise;
+    const { id } = req.params;
+
+    await db.run(`DELETE FROM applications WHERE id = ?`, [id]);
 
     res.json({ message: 'Заявка удалена' });
   } catch (err) {
@@ -69,10 +71,10 @@ router.delete('/requests/:id', (req, res) => {
 });
 
 // 📜 Получение всех услуг
-router.get('/services', (req, res) => {
+router.get('/services', async (req, res) => {
   try {
-    const stmt = db.prepare('SELECT id, name FROM services');
-    const services = stmt.all();
+    const db = await dbPromise;
+    const services = await db.all('SELECT id, name FROM services');
     res.json(services);
   } catch (err) {
     console.error('Ошибка получения услуг:', err);

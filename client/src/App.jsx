@@ -70,7 +70,7 @@ export default function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/steps" element={<Steps />} />
         <Route path="/contacts" element={<Contacts />} />
-        <Route path="/super-admin-zayavki-ppr987123" element={<AdminPanel />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Layout>
   );
