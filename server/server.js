@@ -41,17 +41,7 @@ app.get('*', (req, res) => {
 });
 
 
-if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
-  const credentials = {
-    key: fs.readFileSync(sslKeyPath),
-    cert: fs.readFileSync(sslCertPath),
-  };
+app.listen(PORT, () => {
+  console.log(`🚀 Сервер запущен на порту ${PORT}`);
+});
 
-  https.createServer(credentials, app).listen(PORT, () => {
-    console.log(`🔐 HTTPS-сервер запущен на https://localhost:${PORT}`);
-  });
-} else {
-  http.createServer(app).listen(PORT, () => {
-    console.log(`🌐 HTTPS-сертификаты не найдены, запущен HTTP на http://localhost:${PORT}`);
-  });
-}
