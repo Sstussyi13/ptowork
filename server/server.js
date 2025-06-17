@@ -32,6 +32,15 @@ app.use('/api/upload', uploadRoutes);
 const sslKeyPath = path.join(__dirname, '../ssl/key.pem');
 const sslCertPath = path.join(__dirname, '../ssl/cert.pem');
 
+// 👉 Отдача фронтенда (React)
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// 👉 Обработка всех остальных маршрутов — index.html (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
+
 if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
   const credentials = {
     key: fs.readFileSync(sslKeyPath),
