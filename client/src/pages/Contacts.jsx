@@ -19,6 +19,7 @@ export default function Contacts() {
     service_type: "ПТО",
     message: "",
   });
+}
 
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -26,13 +27,18 @@ export default function Contacts() {
   const [contacts, setContacts] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/content/contacts")
-      .then((res) => setContacts(JSON.parse(res.data.value)))
-      .catch((err) =>
-        console.error("Ошибка загрузки контактных данных:", err)
-      );
-  }, []);
+  const baseURL = import.meta.env.VITE_API_URL || '';
+
+  axios
+    .get(`${baseURL}/content/contacts`, {
+      withCredentials: true,
+    })
+    .then((res) => setContacts(JSON.parse(res.data.value)))
+    .catch((err) =>
+      console.error("Ошибка загрузки контактных данных:", err)
+    );
+}, []);
+
 
   const validate = () => {
     const newErrors = {};
@@ -68,13 +74,16 @@ export default function Contacts() {
     }
 
     try {
-      await axios.post("http://localhost:3000/api/requests", form);
-      setSubmitted(true);
-    } catch (error) {
-      setServerError("Ошибка при отправке. Проверьте соединение или повторите позже.");
-      console.error(error);
-    }
-  };
+  const baseURL = import.meta.env.VITE_API_URL || '';
+  await axios.post(`${baseURL}/requests`, form, {
+    withCredentials: true,
+  });
+  setSubmitted(true);
+} catch (error) {
+  setServerError("Ошибка при отправке. Проверьте соединение или повторите позже.");
+  console.error(error);
+}
+
 
   return (
     <section className="bg-background py-20 px-4 sm:px-6 text-primary">

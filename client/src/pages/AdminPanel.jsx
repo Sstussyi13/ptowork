@@ -56,13 +56,17 @@ export default function AdminPanel() {
 
   // Заявки
   const fetchRequests = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/requests");
-      setRequests(res.data);
-    } catch (err) {
-      console.error("Ошибка при получении заявок:", err);
-    }
-  };
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    const res = await axios.get(`${baseURL}/requests`, {
+      withCredentials: true,
+    });
+    setRequests(res.data);
+  } catch (err) {
+    console.error("Ошибка при получении заявок:", err);
+  }
+};
+
 
   useEffect(() => {
     if (isAuthenticated) fetchRequests();
@@ -74,52 +78,71 @@ export default function AdminPanel() {
   };
 
   const saveEdit = async () => {
-    try {
-      await axios.put(`http://localhost:3000/api/requests/${editId}`, {
-        service_type: editedRequest.service_type,
-        message: editedRequest.message,
-      });
-      setEditId(null);
-      fetchRequests();
-    } catch (err) {
-      console.error("Ошибка при обновлении заявки:", err);
-    }
-  };
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    await axios.put(`${baseURL}/requests/${editId}`, {
+      service_type: editedRequest.service_type,
+      message: editedRequest.message,
+    }, {
+      withCredentials: true,
+    });
+
+    setEditId(null);
+    fetchRequests();
+  } catch (err) {
+    console.error("Ошибка при обновлении заявки:", err);
+  }
+};
+
 
   const deleteRequest = async (id) => {
-    if (!window.confirm("Удалить эту заявку?")) return;
-    try {
-      await axios.delete(`http://localhost:3000/api/requests/${id}`);
-      fetchRequests();
-    } catch (err) {
-      console.error("Ошибка при удалении заявки:", err);
-    }
-  };
+  if (!window.confirm("Удалить эту заявку?")) return;
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    await axios.delete(`${baseURL}/requests/${id}`, {
+      withCredentials: true,
+    });
+    fetchRequests();
+  } catch (err) {
+    console.error("Ошибка при удалении заявки:", err);
+  }
+};
+
 
   // Контент
-  const fetchContent = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/content/all");
-      const data = res.data.reduce((acc, { key, value }) => {
-        acc[key] = JSON.parse(value);
-        return acc;
-      }, {});
-      setContent(data);
-    } catch (err) {
-      console.error("Ошибка при загрузке контента:", err);
-    }
-  };
+ const fetchContent = async () => {
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    const res = await axios.get(`${baseURL}/content/all`, {
+      withCredentials: true,
+    });
+
+    const data = res.data.reduce((acc, { key, value }) => {
+      acc[key] = JSON.parse(value);
+      return acc;
+    }, {});
+
+    setContent(data);
+  } catch (err) {
+    console.error("Ошибка при загрузке контента:", err);
+  }
+};
+
 
   const updateContent = async (key, value) => {
-    try {
-      await axios.put(`http://localhost:3000/api/content/${key}`, {
-        value: JSON.stringify(value),
-      });
-      fetchContent();
-    } catch (err) {
-      console.error("Ошибка при обновлении контента:", err);
-    }
-  };
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || '';
+    await axios.put(`${baseURL}/content/${key}`, {
+      value: JSON.stringify(value),
+    }, {
+      withCredentials: true,
+    });
+
+    fetchContent();
+  } catch (err) {
+    console.error("Ошибка при обновлении контента:", err);
+  }
+};
 
   const handleFileUpload = async (e, idx) => {
     const file = e.target.files[0];
@@ -128,18 +151,27 @@ export default function AdminPanel() {
     const formData = new FormData();
     formData.append("image", file);
 
-    try {
-      const res = await axios.post("http://localhost:3000/api/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const imageUrl = `http://localhost:3000/uploads/${res.data.filename}`;
-      const updated = [...content.cards];
-      updated[idx].image = imageUrl;
-      setContent({ ...content, cards: updated });
-    } catch (err) {
-      console.error("Ошибка при загрузке изображения:", err);
-    }
-  };
+  try {
+  const baseURL = import.meta.env.VITE_API_URL || '';
+
+  const res = await axios.post(`${baseURL}/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    withCredentials: true,
+  });
+
+ const uploadsBase = baseURL.endsWith('/api')
+  ? baseURL.slice(0, -4)
+  : baseURL;
+
+  const imageUrl = `${uploadsBase}/uploads/${res.data.filename}`;
+
+  const updated = [...content.cards];
+  updated[idx].image = imageUrl;
+  setContent({ ...content, cards: updated });
+} catch (err) {
+  console.error("Ошибка при загрузке изображения:", err);
+}
+  }
 
   useEffect(() => {
     if (isAuthenticated) fetchContent();
