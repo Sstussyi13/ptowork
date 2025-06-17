@@ -1,45 +1,20 @@
-import db from '../config/db.js';
+import db from '../config/db.js'; // убедись, что db.js экспортирует экземпляр better-sqlite3
 
 export const getAllCards = () => {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM cards ORDER BY id', [], (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+  return db.prepare('SELECT * FROM cards ORDER BY id').all();
 };
 
 export const createCard = ({ label, link, image }) => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      'INSERT INTO cards (label, link, image) VALUES (?, ?, ?)',
-      [label, link, image],
-      function (err) {
-        if (err) reject(err);
-        else resolve(this.lastID);
-      }
-    );
-  });
+  const stmt = db.prepare('INSERT INTO cards (label, link, image) VALUES (?, ?, ?)');
+  const result = stmt.run(label, link, image);
+  return result.lastInsertRowid;
 };
 
 export const updateCard = (id, { label, link, image }) => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      'UPDATE cards SET label = ?, link = ?, image = ? WHERE id = ?',
-      [label, link, image, id],
-      function (err) {
-        if (err) reject(err);
-        else resolve();
-      }
-    );
-  });
+  db.prepare('UPDATE cards SET label = ?, link = ?, image = ? WHERE id = ?')
+    .run(label, link, image, id);
 };
 
 export const deleteCard = (id) => {
-  return new Promise((resolve, reject) => {
-    db.run('DELETE FROM cards WHERE id = ?', [id], function (err) {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+  db.prepare('DELETE FROM cards WHERE id = ?').run(id);
 };

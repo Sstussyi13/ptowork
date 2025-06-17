@@ -1,13 +1,13 @@
 import express from 'express';
-import dbPromise from '../db/database.js';
+import db from '../config/db.js'; // правильный путь к db (better-sqlite3)
 
 const router = express.Router();
 
-// Получение всего контента
-router.get('/all', async (req, res) => {
-  const db = await dbPromise;
+// 🔹 Получение всего контента
+router.get('/all', (req, res) => {
   try {
-    const rows = await db.all('SELECT * FROM editable_content');
+    const stmt = db.prepare('SELECT * FROM editable_content');
+    const rows = stmt.all();
     res.json(rows);
   } catch (err) {
     console.error('Ошибка при получении контента:', err);
@@ -15,37 +15,37 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Получение контента по ключу (например: cards, services)
-router.get('/:key', async (req, res) => {
-  const db = await dbPromise;
+// 🔹 Получение контента по ключу
+router.get('/:key', (req, res) => {
   const { key } = req.params;
 
   try {
-    const row = await db.get('SELECT value FROM editable_content WHERE key = ?', [key]);
+    const stmt = db.prepare('SELECT value FROM editable_content WHERE key = ?');
+    const row = stmt.get(key);
 
     if (!row) {
       return res.status(404).json({ message: 'Контент не найден' });
     }
 
-    res.json(row); // вернёт { value: '[...]' }
+    res.json(row); // { value: '...' }
   } catch (err) {
     console.error('Ошибка при получении контента по ключу:', err);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
-// Обновление конкретного блока по ключу
-router.put('/:key', async (req, res) => {
-  const db = await dbPromise;
+// 🔹 Обновление или вставка по ключу
+router.put('/:key', (req, res) => {
   const { key } = req.params;
   const { value } = req.body;
 
   try {
-    await db.run(`
+    const stmt = db.prepare(`
       INSERT INTO editable_content (key, value)
       VALUES (?, ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value
-    `, [key, value]);
+    `);
+    stmt.run(key, value);
 
     res.json({ message: 'Контент обновлён' });
   } catch (err) {
