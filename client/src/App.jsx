@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Lenis from "@studio-freight/lenis";
+import React from 'react';
+
 
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
