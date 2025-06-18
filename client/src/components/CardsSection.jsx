@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
-
-const id = uuidv4();
-
+import API from "../api/axios"; // путь зависит от твоей структуры
 
 export default function CardsSection() {
   const [cards, setCards] = useState([]);
@@ -11,8 +7,7 @@ export default function CardsSection() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const baseURL = window.location.origin;
-        const res = await axios.get(`${baseURL}/api/content/all`);
+        const res = await API.get("/content/all");
         const data = res.data.find((item) => item.key === "cards");
         if (data) {
           const parsed = JSON.parse(data.value);
