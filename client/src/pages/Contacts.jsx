@@ -25,19 +25,15 @@ export default function Contacts() {
   const [serverError, setServerError] = useState("");
   const [contacts, setContacts] = useState(null);
 
-useEffect(() => {
-  axios
-    .get('/api/content/contacts')  // ⬅️ важно: без window.location.origin
-    .then((res) => setContacts(JSON.parse(res.data.value)))
-    .catch((err) => console.error("Ошибка загрузки контактных данных:", err)
-    );
-}, []);
-
-
-
-
-
-
+  useEffect(() => {
+    console.log("Монтируется Contacts, отправляем запрос на /api/content/contacts");
+    axios
+      .get("/api/content/contacts")
+      .then((res) => setContacts(JSON.parse(res.data.value)))
+      .catch((err) =>
+        console.error("Ошибка загрузки контактных данных:", err)
+      );
+  }, []);
 
   const validate = () => {
     const newErrors = {};
@@ -73,13 +69,15 @@ useEffect(() => {
     }
 
     try {
-  await axios.post(`${window.location.origin}/api/requests`, form);
-  setSubmitted(true);
-} catch (error) {
-  setServerError("Ошибка при отправке. Проверьте соединение или повторите позже.");
-  console.error(error);
-}
-
+      await axios.post("/api/requests", form);
+      setSubmitted(true);
+    } catch (error) {
+      setServerError(
+        "Ошибка при отправке. Проверьте соединение или повторите позже."
+      );
+      console.error(error);
+    }
+  };
 
   return (
     <section className="bg-background py-20 px-4 sm:px-6 text-primary">
@@ -235,12 +233,11 @@ useEffect(() => {
                 <Clock size={16} /> Режим работы
               </h3>
               <p className="text-muted text-sm whitespace-pre-line">
-                {(contacts?.schedule || "Пн–Сб: 09:00–20:00")
-  .split('\n')
-  .map((line, i) => (
-    <p key={i}>{line}</p>
-  ))}
-
+                {(contacts?.schedule || "Пн–Сб: 09:00–20:00\nВс: выходной")
+                  .split('\n')
+                  .map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
               </p>
             </div>
           </div>
@@ -268,5 +265,4 @@ useEffect(() => {
       </div>
     </section>
   );
-}
 }
