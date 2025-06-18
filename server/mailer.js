@@ -1,51 +1,35 @@
-import { createTransport } from 'nodemailer';
+import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+dotenv.config();
 
-// Правильное определение путей для ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Загрузка .env из корня проекта
-dotenv.config({ path: join(__dirname, '../.env') });
-
-const transporter = createTransport({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === 'true', // ← обязательно как строка
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: {
-    rejectUnauthorized: false
-  }
 });
 
-// Проверка подключения при инициализации
-transporter.verify()
-  .then(() => console.log('✅ SMTP подключение успешно'))
-  .catch(err => console.error('❌ Ошибка SMTP:', err));
-
-export const sendApplicationEmail = async (data) => {
+export const sendApplicationEmail = async ({ full_name, phone, service_type, message }) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Заявки с сайта" <${process.env.SMTP_USER}>`,
+      from: `"Заявка с сайта" <${process.env.SMTP_USER}>`,
       to: process.env.ADMIN_EMAIL,
-      subject: 'Новая заявка',
+      subject: 'Новая заявка с сайта',
       html: `
         <h2>Новая заявка</h2>
-        <p><strong>Имя:</strong> ${data.full_name}</p>
-        <p><strong>Телефон:</strong> ${data.phone}</p>
-        <p><strong>Услуга:</strong> ${data.service_type}</p>
-        <p><strong>Сообщение:</strong> ${data.message}</p>
-      `
+        <p><strong>Имя:</strong> ${full_name}</p>
+        <p><strong>Телефон:</strong> ${phone}</p>
+        <p><strong>Услуга:</strong> ${service_type}</p>
+        <p><strong>Сообщение:</strong><br/>${message}</p>
+      `,
     });
-    console.log('📨 Письмо отправлено:', info.messageId);
-    return info;
+
+    console.log('📨 Email отправлен:', info.messageId);
   } catch (err) {
-    console.error('⚠️ Ошибка отправки:', err);
+    console.error('⚠️ Ошибка при отправке email:', err.message);
     throw err;
   }
 };
