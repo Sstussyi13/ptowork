@@ -4,15 +4,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const nodemailer = require('nodemailer');
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465, // или 587 с secure: false
-  secure: true, // true для порта 465, false для 587
+  port: 587, // или 587
+  secure: true, // true для 465, false для 587 + tls
   auth: {
-    user: process.env.EMAIL_USER, // Твой Gmail
-    pass: process.env.EMAIL_PASS, // Пароль приложения от Google
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
+
 
 /**
  * Отправка email при поступлении новой заявки
