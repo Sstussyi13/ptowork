@@ -25,14 +25,18 @@ export default function Contacts() {
   const [serverError, setServerError] = useState("");
   const [contacts, setContacts] = useState(null);
 
- useEffect(() => {
+useEffect(() => {
   axios
-    .get(`${window.location.origin}/api/content/contacts`)
+    .get('/api/content/contacts')  // ⬅️ важно: без window.location.origin
     .then((res) => setContacts(JSON.parse(res.data.value)))
-    .catch((err) =>
-      console.error("Ошибка загрузки контактных данных:", err)
+    .catch((err) => console.error("Ошибка загрузки контактных данных:", err)
     );
 }, []);
+
+
+
+
+
 
 
   const validate = () => {
