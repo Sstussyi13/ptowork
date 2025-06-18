@@ -31,39 +31,31 @@ export default function Services() {
   const [prices, setPrices] = useState([]);
   const [modalContent, setModalContent] = useState(null);
 
- useEffect(() => {
-  const baseURL = import.meta.env.VITE_API_URL || '';
-
-  axios
-    .get(`${baseURL}/content/services`, {
-      withCredentials: true,
-    })
-    .then((res) => {
-      const parsed = JSON.parse(res.data.value);
-      setServices(parsed);
-    })
-    .catch((err) => {
-      console.error("Ошибка при загрузке услуг:", err);
-    });
-}, []);
-
-
+  // Загрузка услуг
   useEffect(() => {
-  const baseURL = import.meta.env.VITE_API_URL || '';
+    axios
+      .get("http://localhost:3000/api/content/services")
+      .then((res) => {
+        const parsed = JSON.parse(res.data.value);
+        setServices(parsed);
+      })
+      .catch((err) => {
+        console.error("Ошибка при загрузке услуг:", err);
+      });
+  }, []);
 
-  axios
-    .get(`${baseURL}/content/price_table`, {
-      withCredentials: true,
-    })
-    .then((res) => {
-      const parsed = JSON.parse(res.data.value);
-      setPrices(parsed);
-    })
-    .catch((err) => {
-      console.error("Ошибка при загрузке таблицы цен:", err);
-    });
-}, []);
-
+  // Загрузка таблицы цен
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/content/price_table")
+      .then((res) => {
+        const parsed = JSON.parse(res.data.value);
+        setPrices(parsed);
+      })
+      .catch((err) => {
+        console.error("Ошибка при загрузке таблицы цен:", err);
+      });
+  }, []);
 
   return (
     <section className="bg-white text-gray-800 py-20 px-4 sm:px-6">

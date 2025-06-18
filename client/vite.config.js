@@ -5,7 +5,6 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
-    base: './', // 👈 вот это критично для работы на Render
   build: {
     rollupOptions: {
       input: {
