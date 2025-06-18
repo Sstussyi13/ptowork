@@ -29,19 +29,16 @@ export default function Steps() {
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
 
-    // Загружаем шаги из контента
-useEffect(() => {
-  axios
-    .get(`${window.location.origin}/api/content/steps`)
-    .then((res) => {
-      const parsed = JSON.parse(res.data.value);
-      setSteps(parsed);
-    })
-    .catch((err) => {
-      console.error("Ошибка загрузки этапов:", err);
-    });
-}, []);
-
+    axios
+      .get(`${window.location.origin}/api/content/steps`)
+      .then((res) => {
+        const parsed = JSON.parse(res.data.value);
+        setSteps(parsed);
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки этапов:", err);
+      });
+  }, []);
 
   return (
     <section className="bg-white py-20 px-4 text-gray-800">
@@ -53,7 +50,7 @@ useEffect(() => {
 
         <div className="space-y-8">
           {steps.map((step, idx) => {
-            const Icon = ICONS[step.icon] || FileText; // fallback
+            const Icon = ICONS[step.icon] || FileText;
             return (
               <div
                 key={idx}
@@ -85,4 +82,3 @@ useEffect(() => {
     </section>
   );
 }
-) }
