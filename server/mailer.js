@@ -5,18 +5,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: 'smtp.yandex.ru', // или smtp.gmail.com
   port: 587,
-  secure: false, // ⚠️ 587 = false, 465 = true
+  secure: false, // 465 = true, 587 = false + TLS
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-/**
- * Отправка email при поступлении новой заявки
- */
 export const sendApplicationEmail = async ({ full_name, phone, service_type, message }) => {
   try {
     const info = await transporter.sendMail({
@@ -31,7 +28,6 @@ export const sendApplicationEmail = async ({ full_name, phone, service_type, mes
         <p><strong>Сообщение:</strong><br/>${message}</p>
       `,
     });
-
     console.log('📨 Email отправлен:', info.messageId);
   } catch (err) {
     console.error('⚠️ Ошибка при отправке email:', err.message);
