@@ -6,30 +6,32 @@ export default function ContentEditor() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/content/price_table")
-      .then((res) => setData(res.data))
-      .catch((err) => console.error("Ошибка получения контента:", err));
-  }, []);
+  axios
+    .get(`${window.location.origin}/api/content/price_table`)
+    .then((res) => setData(res.data))
+    .catch((err) => console.error("Ошибка получения контента:", err));
+}, []);
+
 
   const handleChange = (e) => {
     setData({ ...data, content: e.target.value });
   };
 
   const saveContent = async () => {
-    setSaving(true);
-    try {
-      await axios.put("http://localhost:5000/api/content/price_table", {
-        content: data.content,
-      });
-      alert("Сохранено!");
-    } catch (err) {
-      console.error("Ошибка сохранения:", err);
-      alert("Ошибка при сохранении.");
-    } finally {
-      setSaving(false);
-    }
-  };
+  setSaving(true);
+  try {
+    await axios.put(`${window.location.origin}/api/content/price_table`, {
+      content: data.content,
+    });
+    alert("Сохранено!");
+  } catch (err) {
+    console.error("Ошибка сохранения:", err);
+    alert("Ошибка при сохранении.");
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   return (
     <div>

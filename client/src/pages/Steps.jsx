@@ -30,16 +30,18 @@ export default function Steps() {
     AOS.init({ duration: 800, once: true });
 
     // Загружаем шаги из контента
-    axios
-      .get("http://localhost:3000/api/content/steps")
-      .then((res) => {
-        const parsed = JSON.parse(res.data.value);
-        setSteps(parsed);
-      })
-      .catch((err) => {
-        console.error("Ошибка загрузки этапов:", err);
-      });
-  }, []);
+useEffect(() => {
+  axios
+    .get(`${window.location.origin}/api/content/steps`)
+    .then((res) => {
+      const parsed = JSON.parse(res.data.value);
+      setSteps(parsed);
+    })
+    .catch((err) => {
+      console.error("Ошибка загрузки этапов:", err);
+    });
+}, []);
+
 
   return (
     <section className="bg-white py-20 px-4 text-gray-800">
@@ -83,3 +85,4 @@ export default function Steps() {
     </section>
   );
 }
+) }

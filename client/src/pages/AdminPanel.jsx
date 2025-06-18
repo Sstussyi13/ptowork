@@ -21,7 +21,7 @@ const ICONS = {
   BookOpen
 };
 
-
+const API_URL = window.location.origin;
 const ADMIN_PASSWORD = "123";
 
 export default function AdminPanel() {
@@ -55,14 +55,15 @@ export default function AdminPanel() {
   };
 
   // Заявки
-  const fetchRequests = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/requests");
-      setRequests(res.data);
-    } catch (err) {
-      console.error("Ошибка при получении заявок:", err);
-    }
-  };
+ const fetchRequests = async () => {
+  try {
+    const res = await axios.get(`${window.location.origin}/api/requests`);
+    setRequests(res.data);
+  } catch (err) {
+    console.error("Ошибка при получении заявок:", err);
+  }
+};
+
 
   useEffect(() => {
     if (isAuthenticated) fetchRequests();
@@ -74,52 +75,55 @@ export default function AdminPanel() {
   };
 
   const saveEdit = async () => {
-    try {
-      await axios.put(`http://localhost:3000/api/requests/${editId}`, {
-        service_type: editedRequest.service_type,
-        message: editedRequest.message,
-      });
-      setEditId(null);
-      fetchRequests();
-    } catch (err) {
-      console.error("Ошибка при обновлении заявки:", err);
-    }
-  };
+  try {
+    await axios.put(`${window.location.origin}/api/requests/${editId}`, {
+      service_type: editedRequest.service_type,
+      message: editedRequest.message,
+    });
+    setEditId(null);
+    fetchRequests();
+  } catch (err) {
+    console.error("Ошибка при обновлении заявки:", err);
+  }
+};
 
   const deleteRequest = async (id) => {
-    if (!window.confirm("Удалить эту заявку?")) return;
-    try {
-      await axios.delete(`http://localhost:3000/api/requests/${id}`);
-      fetchRequests();
-    } catch (err) {
-      console.error("Ошибка при удалении заявки:", err);
-    }
-  };
+  if (!window.confirm("Удалить эту заявку?")) return;
+  try {
+    await axios.delete(`${window.location.origin}/api/requests/${id}`);
+    fetchRequests();
+  } catch (err) {
+    console.error("Ошибка при удалении заявки:", err);
+  }
+};
+
 
   // Контент
   const fetchContent = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/content/all");
-      const data = res.data.reduce((acc, { key, value }) => {
-        acc[key] = JSON.parse(value);
-        return acc;
-      }, {});
-      setContent(data);
-    } catch (err) {
-      console.error("Ошибка при загрузке контента:", err);
-    }
-  };
+  try {
+    const res = await axios.get(`${window.location.origin}/api/content/all`);
+    const data = res.data.reduce((acc, { key, value }) => {
+      acc[key] = JSON.parse(value);
+      return acc;
+    }, {});
+    setContent(data);
+  } catch (err) {
+    console.error("Ошибка при загрузке контента:", err);
+  }
+};
+
 
   const updateContent = async (key, value) => {
-    try {
-      await axios.put(`http://localhost:3000/api/content/${key}`, {
-        value: JSON.stringify(value),
-      });
-      fetchContent();
-    } catch (err) {
-      console.error("Ошибка при обновлении контента:", err);
-    }
-  };
+  try {
+    await axios.put(`${window.location.origin}/api/content/${key}`, {
+      value: JSON.stringify(value),
+    });
+    fetchContent();
+  } catch (err) {
+    console.error("Ошибка при обновлении контента:", err);
+  }
+};
+
 
   const handleFileUpload = async (e, idx) => {
     const file = e.target.files[0];
@@ -128,22 +132,37 @@ export default function AdminPanel() {
     const formData = new FormData();
     formData.append("image", file);
 
-    try {
-      const res = await axios.post("http://localhost:3000/api/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const imageUrl = `http://localhost:3000/uploads/${res.data.filename}`;
-      const updated = [...content.cards];
-      updated[idx].image = imageUrl;
-      setContent({ ...content, cards: updated });
-    } catch (err) {
-      console.error("Ошибка при загрузке изображения:", err);
-    }
-  };
+    const handleFileUpload = async (e, idx) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  useEffect(() => {
-    if (isAuthenticated) fetchContent();
-  }, [isAuthenticated]);
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const handleFileUpload = async (e, idx) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const res = await axios.post(`${window.location.origin}/api/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const imageUrl = `${window.location.origin}/uploads/${res.data.filename}`;
+    const updated = [...content.cards];
+    updated[idx].image = imageUrl;
+    setContent({ ...content, cards: updated });
+  } catch (err) {
+    console.error("Ошибка при загрузке изображения:", err);
+  }
+};
+
+useEffect(() => {
+  if (isAuthenticated) fetchContent();
+}, [isAuthenticated]);
+
 
   if (!isAuthenticated) {
     return (
@@ -578,4 +597,6 @@ export default function AdminPanel() {
 
     </div>
   );
+}
+  } 
 }

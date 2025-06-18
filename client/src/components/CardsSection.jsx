@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CardsSection() {
   const [cards, setCards] = useState([]);
@@ -7,7 +8,8 @@ export default function CardsSection() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/content/all");
+        const baseURL = window.location.origin;
+        const res = await axios.get(`${baseURL}/api/content/all`);
         const data = res.data.find((item) => item.key === "cards");
         if (data) {
           const parsed = JSON.parse(data.value);
@@ -37,7 +39,6 @@ export default function CardsSection() {
                         transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
                         hover:scale-[1.03]"
             >
-              {/* Изображение и градиент поверх */}
               <div className="relative h-60 w-full">
                 <img
                   src={item.image}
@@ -47,7 +48,6 @@ export default function CardsSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
               </div>
 
-              {/* Текст поверх изображения */}
               <div className="absolute bottom-0 z-20 p-5 w-full flex flex-col justify-end">
                 <h3 className="text-white text-xl font-semibold mb-2">{item.label}</h3>
                 <div className="text-white opacity-80 transition-transform group-hover:translate-x-1">→</div>

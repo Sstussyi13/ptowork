@@ -25,14 +25,15 @@ export default function Contacts() {
   const [serverError, setServerError] = useState("");
   const [contacts, setContacts] = useState(null);
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/content/contacts")
-      .then((res) => setContacts(JSON.parse(res.data.value)))
-      .catch((err) =>
-        console.error("Ошибка загрузки контактных данных:", err)
-      );
-  }, []);
+ useEffect(() => {
+  axios
+    .get(`${window.location.origin}/api/content/contacts`)
+    .then((res) => setContacts(JSON.parse(res.data.value)))
+    .catch((err) =>
+      console.error("Ошибка загрузки контактных данных:", err)
+    );
+}, []);
+
 
   const validate = () => {
     const newErrors = {};
@@ -68,13 +69,13 @@ export default function Contacts() {
     }
 
     try {
-      await axios.post("http://localhost:3000/api/requests", form);
-      setSubmitted(true);
-    } catch (error) {
-      setServerError("Ошибка при отправке. Проверьте соединение или повторите позже.");
-      console.error(error);
-    }
-  };
+  await axios.post(`${window.location.origin}/api/requests`, form);
+  setSubmitted(true);
+} catch (error) {
+  setServerError("Ошибка при отправке. Проверьте соединение или повторите позже.");
+  console.error(error);
+}
+
 
   return (
     <section className="bg-background py-20 px-4 sm:px-6 text-primary">
@@ -263,4 +264,5 @@ export default function Contacts() {
       </div>
     </section>
   );
+}
 }
