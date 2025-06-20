@@ -1,6 +1,7 @@
 import db from '../db/database.js';
 import { sendApplicationEmail } from '../mailer.js';
 
+
 export const submitRequest = async (req, res) => {
   const { full_name, phone, service_type, message } = req.body;
 

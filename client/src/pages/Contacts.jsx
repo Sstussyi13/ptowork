@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from '../api/axios'; // путь может отличаться
+
 import InputMask from "react-input-mask";
 import {
   Mail,
@@ -26,14 +27,14 @@ export default function Contacts() {
   const [contacts, setContacts] = useState(null);
 
   useEffect(() => {
-    console.log("Монтируется Contacts, отправляем запрос на /api/content/contacts");
-    axios
-      .get("/api/content/contacts")
-      .then((res) => setContacts(JSON.parse(res.data.value)))
-      .catch((err) =>
-        console.error("Ошибка загрузки контактных данных:", err)
-      );
-  }, []);
+  console.log("Монтируется Contacts, отправляем запрос на /api/content/contacts");
+  API.get("/content/contacts")
+    .then((res) => setContacts(JSON.parse(res.data.value)))
+    .catch((err) =>
+      console.error("Ошибка загрузки контактных данных:", err)
+    );
+}, []);
+
 
   const validate = () => {
     const newErrors = {};
@@ -69,7 +70,8 @@ export default function Contacts() {
     }
 
     try {
-      await axios.post("/api/requests", form);
+     await API.post("/requests", form); // автоматически подставит baseURL
+
       setSubmitted(true);
     } catch (error) {
       setServerError(

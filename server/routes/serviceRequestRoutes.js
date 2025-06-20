@@ -1,17 +1,20 @@
 import express from 'express';
-import { submitRequest } from '../controllers/serviceRequestController.js';
 import dbPromise from '../db/database.js';
-import { requireAdmin } from '../middlewares/requireAdmin.js';
-import { sendApplicationEmail } from '../server/mailer.js'; // Добавлен импорт
+import { sendApplicationEmail } from '../mailer.js';
+
 
 const router = express.Router();
 
-// 📤 Отправка заявки (обновленный обработчик)
+// 📤 Отправка заявки
 router.post('/requests', async (req, res) => {
   try {
     const { full_name, phone, service_type, message } = req.body;
+
+    // ✅ Лог в терминал:
+    console.log('📥 Заявка получена на сервере:', req.body);
+
     const db = await dbPromise;
-    
+
     // Проверка существования услуги
     const service = await db.get('SELECT id FROM services WHERE name = ?', [service_type]);
     if (!service) {
@@ -26,26 +29,31 @@ router.post('/requests', async (req, res) => {
       [full_name, phone, message, service.id]
     );
 
-    // Отправка email (добавлено)
+    // Отправка email
     await sendApplicationEmail({ full_name, phone, service_type, message });
 
-    res.status(201).json({ message: 'Заявка успешно отправлена' });
+    res.status(201).json({ message: 'Заявка успешно отправлена и сохранена' });
   } catch (err) {
-    console.error('Ошибка при создании заявки:', err);
+    console.error('❌ Ошибка при создании заявки:', err);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
-// 📥 Получение всех заявок (остается без изменений)
-router.get('/requests', /* ... */);
+// Остальные маршруты (заглушки пока не используются)
+router.get('/requests', (req, res) => {
+  res.status(501).json({ message: 'Not implemented' });
+});
 
-// ✏️ Обновление заявки (остается без изменений)
-router.put('/requests/:id', /* ... */);
+router.put('/requests/:id', (req, res) => {
+  res.status(501).json({ message: 'Not implemented' });
+});
 
-// ❌ Удаление заявки (остается без изменений)
-router.delete('/requests/:id', /* ... */);
+router.delete('/requests/:id', (req, res) => {
+  res.status(501).json({ message: 'Not implemented' });
+});
 
-// 📜 Получение всех услуг (остается без изменений)
-router.get('/services', /* ... */);
+router.get('/services', (req, res) => {
+  res.status(501).json({ message: 'Not implemented' });
+});
 
 export default router;
